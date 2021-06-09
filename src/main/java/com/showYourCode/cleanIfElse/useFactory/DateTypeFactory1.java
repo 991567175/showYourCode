@@ -10,6 +10,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -25,7 +26,7 @@ public class DateTypeFactory1 implements BeanPostProcessor {
     @Autowired
     private DateTypeOfYearHandler dateTypeOfYearHandler;
 
-    private Map<DateTypeEnum, DateTypeHandler> dateTypeHandlerMap = new ConcurrentHashMap<>(3);
+    private final Map<DateTypeEnum, DateTypeHandler> dateTypeHandlerMap = new ConcurrentHashMap<>(3);
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
@@ -37,8 +38,10 @@ public class DateTypeFactory1 implements BeanPostProcessor {
 
     public DateTypeHandler getHandler(Integer dateTypeCode) {
         DateTypeEnum dateTypeEnum = DateTypeEnum.getEnumByCode(dateTypeCode);
-        DateTypeHandler dateTypeHandler = this.dateTypeHandlerMap.get(dateTypeEnum);
-        return dateTypeHandler;
+        if (Objects.isNull(dateTypeEnum)) {
+            throw new RuntimeException();
+        }
+        return this.dateTypeHandlerMap.get(dateTypeEnum);
     }
 
 }

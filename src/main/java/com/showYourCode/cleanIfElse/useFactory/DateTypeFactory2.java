@@ -1,44 +1,62 @@
 package com.showYourCode.cleanIfElse.useFactory;
 
-import com.showYourCode.cleanIfElse.useEnum.DateTypeEnum;
-import com.showYourCode.cleanIfElse.useFactory.handler.DateTypeOfMonthHandler;
-import com.showYourCode.cleanIfElse.useFactory.handler.DateTypeOfQuarterHandler;
-import com.showYourCode.cleanIfElse.useFactory.handler.DateTypeOfYearHandler;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Objects;
 
-/**
- * 实现InitializingBean接口的afterPropertiesSet，也能实现同样的功能
- */
 @Component
-public class DateTypeFactory2 implements BeanPostProcessor {
+public class DateTypeFactory2 {
 
     @Autowired
-    private DateTypeOfMonthHandler dateTypeOfMonthHandler;
-    @Autowired
-    private DateTypeOfQuarterHandler dateTypeOfQuarterHandler;
-    @Autowired
-    private DateTypeOfYearHandler dateTypeOfYearHandler;
-
-    private Map<DateTypeEnum, DateTypeHandler> dateTypeHandlerMap = new ConcurrentHashMap<>(3);
-
-    @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        dateTypeHandlerMap.put(DateTypeEnum.MONTH, dateTypeOfMonthHandler);
-        dateTypeHandlerMap.put(DateTypeEnum.QUARTER, dateTypeOfQuarterHandler);
-        dateTypeHandlerMap.put(DateTypeEnum.YEAR, dateTypeOfYearHandler);
-        return BeanPostProcessor.super.postProcessAfterInitialization(bean, beanName);
-    }
+    private ApplicationContext applicationContext;
 
     public DateTypeHandler getHandler(Integer dateTypeCode) {
-        DateTypeEnum dateTypeEnum = DateTypeEnum.getEnumByCode(dateTypeCode);
-        DateTypeHandler dateTypeHandler = this.dateTypeHandlerMap.get(dateTypeEnum);
-        return dateTypeHandler;
+        DateTypeFactory2Enum enumByCode = DateTypeFactory2Enum.getEnumByCode(dateTypeCode);
+        if (Objects.isNull(enumByCode)) {
+            throw new RuntimeException();
+        }
+        return applicationContext.getBean(enumByCode.getBeanName(), DateTypeHandler.class);
+    }
+
+    public enum DateTypeFactory2Enum {
+        MONTH(0, "月", "dateTypeOfMonthHandler"),
+        QUARTER(1, "季", "dateTypeOfQuarterHandler"),
+        YEAR(2, "年", "dateTypeOfYearHandler"),
+        ;
+
+
+        private final Integer code;
+        private final String desc;
+        private final String beanName;
+
+        DateTypeFactory2Enum(Integer code, String desc, String beanName) {
+            this.code = code;
+            this.desc = desc;
+            this.beanName = beanName;
+        }
+
+        public static DateTypeFactory2Enum getEnumByCode(Integer code) {
+            for (DateTypeFactory2Enum value : DateTypeFactory2Enum.values()) {
+                if (Objects.equals(value.code, code)) {
+                    return value;
+                }
+            }
+            return null;
+        }
+
+        public Integer getCode() {
+            return code;
+        }
+
+        public String getDesc() {
+            return desc;
+        }
+
+        public String getBeanName() {
+            return beanName;
+        }
     }
 
 }
