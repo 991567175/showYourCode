@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -25,7 +26,12 @@ public class DateTypeFactory implements BeanPostProcessor {
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof DateTypeService) {
-            DateType annotation = bean.getClass().getAnnotation(DateType.class);
+            DateType annotation = AnnotationUtils.findAnnotation(bean.getClass(), DateType.class);
+            /**
+             * 当bean为代理类（比如该类中有@Transactional注解）时，.getAnnotation(DateType.class)返回null
+             * 而AnnotationUtils.findAnnotation(bean.getClass(), DateType.class)可以解决这个问题
+             */
+//            DateType annotation = bean.getClass().getAnnotation(DateType.class);
             if (Objects.nonNull(annotation)) {
                 DateTypeEnum dateTypeEnum = annotation.value();
                 dateTypeHandlerMap.put(dateTypeEnum, (DateTypeService) bean);

@@ -30,6 +30,7 @@ public class UseFactoryAndAnnotationTest {
         if (AopUtils.isAopProxy(service)) {
             log.info(service.toString());
         }
+        // dateTypeOfMonthService 类上有@Transactional注解，所以这里是一个代理对象
         if (AopUtils.isAopProxy(dateTypeOfMonthService)) {
             log.info(dateTypeOfMonthService.toString());
         }
