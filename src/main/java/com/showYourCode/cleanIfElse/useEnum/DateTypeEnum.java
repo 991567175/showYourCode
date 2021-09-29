@@ -64,7 +64,7 @@ public enum DateTypeEnum {
     }
 
     public static DateTypeEnum getEnumByCode(Integer code) {
-        for (DateTypeEnum value : DateTypeEnum.values()) {
+        for (DateTypeEnum value : values()) {
             if (Objects.equals(value.code, code)) {
                 return value;
             }
